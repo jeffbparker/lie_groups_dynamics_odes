@@ -1,0 +1,10 @@
+# By default, build in C++ 17 mode.
+build --cxxopt=-std=c++17
+build --host_cxxopt=-std=c++17
+
+# compilation mode.
+build -c opt
+
+build --cxxopt="-Wall"
+build --cxxopt="-Wextra"
+build --cxxopt="-Werror"
