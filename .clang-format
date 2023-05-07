@@ -6,6 +6,7 @@ IndentWidth:     4
 PointerAlignment: Left
 TabWidth: 4
 AccessModifierOffset: -3
-ConstructorInitializerIndentWidth: 6
+ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
+
 ...
