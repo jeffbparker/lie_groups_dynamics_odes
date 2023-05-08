@@ -67,7 +67,7 @@ double compute_power_exponent(const std::vector<double>& x, const std::vector<do
 // The expected solution has been pre-computed separately with standard RK4 at high precision (small
 // timestep).
 
-TEST(LieGroupIntegratorTest, EulerErrorScalingWithDt) {
+TEST(LieGroupIntegratorTest, LieEulerErrorScalingWithDt) {
     // SETUP
     const State y_initial{initial_condition()};
     const HeavyTop heavy_top{create_heavy_top()};
@@ -82,7 +82,7 @@ TEST(LieGroupIntegratorTest, EulerErrorScalingWithDt) {
     std::vector<double> error_vec;
 
     for (double dt : dt_vec) {
-        DriverConstantTimestep<StepperEuler> driver{y_initial, t_start, t_end, dt, heavy_top};
+        DriverConstantTimestep<StepperLieEuler> driver{y_initial, t_start, t_end, dt, heavy_top};
         const State y_final = driver.integrate();
         const double R22 = y_final.R.matrix()(2, 2);
         const double error = std::abs((R22 - R22_expected) / R22_expected);
@@ -96,5 +96,38 @@ TEST(LieGroupIntegratorTest, EulerErrorScalingWithDt) {
     // asymptotically, error should scale as err ~ dt^p, with p=1 for Euler.
     std::cout << "error order = " << error_order << std::endl;
     constexpr int EXPECTED_ERROR_ORDER = 1;
+    EXPECT_NEAR(error_order, EXPECTED_ERROR_ORDER, TOL);
+}
+
+TEST(LieGroupIntegratorTest, LieRK2ErrorScalingWithDt) {
+    // SETUP
+    const State y_initial{initial_condition()};
+    const HeavyTop heavy_top{create_heavy_top()};
+    const double R22_expected = 0.948719679138258;
+
+    // ACTION
+    constexpr double t_start = 0;
+    constexpr double t_end = 0.4;  // 0.4
+
+    // loop over dt
+    const std::vector<double> dt_vec{1e-5, 1e-4, 1e-3};
+    std::vector<double> error_vec;
+
+    for (double dt : dt_vec) {
+        DriverConstantTimestep<StepperLieRK2Midpoint> driver{y_initial, t_start, t_end, dt,
+                                                             heavy_top};
+        const State y_final = driver.integrate();
+        const double R22 = y_final.R.matrix()(2, 2);
+        const double error = std::abs((R22 - R22_expected) / R22_expected);
+        error_vec.push_back(error);
+    }
+
+    // VERIFICATION
+    const double error_order = compute_power_exponent(dt_vec, error_vec);
+    constexpr double TOL = 0.05;
+
+    // asymptotically, error should scale as err ~ dt^p, with p=2 for Lie-RK2 Midpoint.
+    std::cout << "error order = " << error_order << std::endl;
+    constexpr int EXPECTED_ERROR_ORDER = 2;
     EXPECT_NEAR(error_order, EXPECTED_ERROR_ORDER, TOL);
 }

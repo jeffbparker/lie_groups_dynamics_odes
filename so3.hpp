@@ -7,6 +7,8 @@
 // Class for Lie group elements SO(3)
 class SO3 {
  public:
+    SO3() : mat_{Eigen::Matrix3d::Identity()} {}
+
     // Constructor, assuming R is a valid SO(3); i.e. does not check it is a valid rotation matrix.
     explicit SO3(const Eigen::Matrix3d& mat) : mat_{std::move(mat)} {}
 
