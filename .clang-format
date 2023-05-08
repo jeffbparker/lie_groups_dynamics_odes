@@ -3,6 +3,7 @@ Language:        Cpp
 BasedOnStyle: Google
 ColumnLimit:     101
 IndentWidth:     4
+DerivePointerAlignment: false
 PointerAlignment: Left
 TabWidth: 4
 AccessModifierOffset: -3
