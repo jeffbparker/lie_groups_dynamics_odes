@@ -4,6 +4,8 @@
 
 EIGEN_FILES = [
     "Eigen/**",
+    "unsupported/Eigen/MatrixFunctions",
+    "unsupported/Eigen/src/MatrixFunctions/**",
 ]
 
 cc_library(
