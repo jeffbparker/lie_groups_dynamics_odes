@@ -37,3 +37,39 @@ class StepperLieRK2Midpoint {
     StateDot dydt1_;  // time derivative at t
     StateDot dydt2_;  // time derivative at t + dt/2
 };
+
+// 4th-order, Lie-RK4, graded free algebra minimizing the number of commutators
+class StepperLieRK4 {
+ public:
+    StepperLieRK4() = default;
+
+    void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
+
+ private:
+    // intermediate-stage states and derivative storage
+    State y2_;
+    State y3_;
+    State y4_;
+
+    StateDot dydt1_;
+    StateDot dydt2_;
+    StateDot dydt3_;
+    StateDot dydt4_;
+};
+
+// 2nd-order Lie-RK2CF (Commutator free), part of 3-2 adaptive method
+class StepperLieRK2CF {
+ public:
+    StepperLieRK2CF() = default;
+
+    void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
+
+ private:
+    // intermediate-stage states and derivative storage
+    State y2_;
+    State y3_;
+
+    StateDot dydt1_;
+    StateDot dydt2_;
+    StateDot dydt3_;
+};

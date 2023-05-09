@@ -48,6 +48,7 @@ cc_library(
     hdrs = ["non_adaptive_steppers.hpp"],
     deps = [
         ":aliases",
+        ":so3",
         ":state",
         "@eigen",
     ],
