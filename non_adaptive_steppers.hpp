@@ -9,8 +9,6 @@
 // 1st-order explicit, Lie Euler
 class StepperLieEuler {
  public:
-    StepperLieEuler() = default;
-
     /**
      * @brief Given state y at time t, perform step and update y to time t + dt
      *
@@ -28,8 +26,14 @@ class StepperLieEuler {
 // 2nd-order, Lie-RK2-midpoint
 class StepperLieRK2Midpoint {
  public:
-    StepperLieRK2Midpoint() = default;
-
+    /**
+     * @brief Given state y at time t, perform step and update y to time t + dt
+     *
+     * @param t - Time at beginning of step
+     * @param dt -timestep
+     * @param rhs_func - Function to compute time derivatives, dy/dt = f(t, y)
+     * @param y - On entry, state at time t.  On exit, state at time t + dt
+     */
     void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
 
  private:
@@ -41,15 +45,19 @@ class StepperLieRK2Midpoint {
 // 4th-order, Lie-RK4, graded free algebra minimizing the number of commutators
 class StepperLieRK4 {
  public:
-    StepperLieRK4() = default;
-
+    /**
+     * @brief Given state y at time t, perform step and update y to time t + dt
+     *
+     * @param t - Time at beginning of step
+     * @param dt -timestep
+     * @param rhs_func - Function to compute time derivatives, dy/dt = f(t, y)
+     * @param y - On entry, state at time t.  On exit, state at time t + dt
+     */
     void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
 
  private:
     // intermediate-stage states and derivative storage
-    State y2_;
-    State y3_;
-    State y4_;
+    State ytemp_;
 
     StateDot dydt1_;
     StateDot dydt2_;
@@ -60,8 +68,14 @@ class StepperLieRK4 {
 // 2nd-order Lie-RK2CF (Commutator free), part of 3-2 adaptive method
 class StepperLieRK2CF {
  public:
-    StepperLieRK2CF() = default;
-
+    /**
+     * @brief Given state y at time t, perform step and update y to time t + dt
+     *
+     * @param t - Time at beginning of step
+     * @param dt -timestep
+     * @param rhs_func - Function to compute time derivatives, dy/dt = f(t, y)
+     * @param y - On entry, state at time t.  On exit, state at time t + dt
+     */
     void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
 
  private:
@@ -74,11 +88,17 @@ class StepperLieRK2CF {
     StateDot dydt3_;
 };
 
-// 2nd-order Lie-RK3CF (Commutator free), part of 3-2 adaptive method
+// 3rd-order Lie-RK3CF (Commutator free), part of 3-2 adaptive method
 class StepperLieRK3CF {
  public:
-    StepperLieRK3CF() = default;
-
+    /**
+     * @brief Given state y at time t, perform step and update y to time t + dt
+     *
+     * @param t - Time at beginning of step
+     * @param dt -timestep
+     * @param rhs_func - Function to compute time derivatives, dy/dt = f(t, y)
+     * @param y - On entry, state at time t.  On exit, state at time t + dt
+     */
     void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
 
  private:
