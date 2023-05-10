@@ -122,7 +122,6 @@ TEST(LieGroupIntegratorTest, LieRK2ErrorScalingWithDt) {
         const State y_final = driver.integrate();
         const double R22 = y_final.R.matrix()(2, 2);
         const double error = std::abs((R22 - R22_expected) / R22_expected);
-        // std::cout << error << std::endl;
         error_vec.push_back(error);
     }
 
@@ -140,7 +139,6 @@ TEST(LieGroupIntegratorTest, LieRK4ErrorScalingWithDt) {
     // SETUP
     const State y_initial{initial_condition()};
     const HeavyTop heavy_top{create_heavy_top()};
-    const double R22_expected = 0.948719679138258;
 
     // ACTION
     constexpr double t_start = 0;
@@ -151,7 +149,6 @@ TEST(LieGroupIntegratorTest, LieRK4ErrorScalingWithDt) {
     DriverConstantTimestep<StepperLieRK4> driver{y_initial, t_start, t_end, dt_ref, heavy_top};
     const State y_final_ref = driver.integrate();
     const Eigen::Matrix3d& R_ref = y_final_ref.R.matrix();
-    std::cout << R_ref(2, 2) - R22_expected << std::endl;
 
     // loop over dt
     const std::vector<double> dt_vec{1e-5, 3e-5, 1e-4};
@@ -171,7 +168,6 @@ TEST(LieGroupIntegratorTest, LieRK4ErrorScalingWithDt) {
     constexpr double TOL = 0.05;
 
     // asymptotically, error should scale as err ~ dt^p, with p=4 for Lie-RK4 Midpoint.
-    std::cout << "error order = " << error_order << std::endl;
     constexpr int EXPECTED_ERROR_ORDER = 4;
     EXPECT_NEAR(error_order, EXPECTED_ERROR_ORDER, TOL);
 }
@@ -180,7 +176,6 @@ TEST(LieGroupIntegratorTest, LieRK2CFErrorScalingWithDt) {
     // SETUP
     const State y_initial{initial_condition()};
     const HeavyTop heavy_top{create_heavy_top()};
-    const double R22_expected = 0.948719679138258;
 
     // ACTION
     constexpr double t_start = 0;
@@ -191,7 +186,6 @@ TEST(LieGroupIntegratorTest, LieRK2CFErrorScalingWithDt) {
     DriverConstantTimestep<StepperLieRK4> driver{y_initial, t_start, t_end, dt_ref, heavy_top};
     const State y_final_ref = driver.integrate();
     const Eigen::Matrix3d& R_ref = y_final_ref.R.matrix();
-    std::cout << R_ref(2, 2) - R22_expected << std::endl;
 
     // loop over dt
     const std::vector<double> dt_vec{1e-5, 1e-4, 1e-3};
@@ -202,8 +196,6 @@ TEST(LieGroupIntegratorTest, LieRK2CFErrorScalingWithDt) {
         const State y_final = driver.integrate();
         const Eigen::Matrix3d& R_final = y_final.R.matrix();
         const double error = frobenius_error(R_final, R_ref);
-
-        std::cout << error << std::endl;
         error_vec.push_back(error);
     }
 
@@ -212,7 +204,42 @@ TEST(LieGroupIntegratorTest, LieRK2CFErrorScalingWithDt) {
     constexpr double TOL = 0.05;
 
     // asymptotically, error should scale as err ~ dt^p, with p=2 for Lie-RK2CF
-    std::cout << "error order = " << error_order << std::endl;
     constexpr int EXPECTED_ERROR_ORDER = 2;
+    EXPECT_NEAR(error_order, EXPECTED_ERROR_ORDER, TOL);
+}
+
+TEST(LieGroupIntegratorTest, LieRK3CFErrorScalingWithDt) {
+    // SETUP
+    const State y_initial{initial_condition()};
+    const HeavyTop heavy_top{create_heavy_top()};
+
+    // ACTION
+    constexpr double t_start = 0;
+    constexpr double t_end = 0.4;  // 0.4
+
+    // compute reference value with small dt.
+    const double dt_ref = 1e-5;
+    DriverConstantTimestep<StepperLieRK4> driver{y_initial, t_start, t_end, dt_ref, heavy_top};
+    const State y_final_ref = driver.integrate();
+    const Eigen::Matrix3d& R_ref = y_final_ref.R.matrix();
+
+    // loop over dt
+    const std::vector<double> dt_vec{1e-5, 3e-5, 1e-4, 3e-4};
+    std::vector<double> error_vec;
+
+    for (double dt : dt_vec) {
+        DriverConstantTimestep<StepperLieRK3CF> driver{y_initial, t_start, t_end, dt, heavy_top};
+        const State y_final = driver.integrate();
+        const Eigen::Matrix3d& R_final = y_final.R.matrix();
+        const double error = frobenius_error(R_final, R_ref);
+        error_vec.push_back(error);
+    }
+
+    // VERIFICATION
+    const double error_order = compute_power_exponent(dt_vec, error_vec);
+    constexpr double TOL = 0.2;
+
+    // asymptotically, error should scale as err ~ dt^p, with p=3 for Lie-RK3CF
+    constexpr int EXPECTED_ERROR_ORDER = 3;
     EXPECT_NEAR(error_order, EXPECTED_ERROR_ORDER, TOL);
 }

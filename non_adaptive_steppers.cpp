@@ -41,7 +41,7 @@ void StepperLieRK4::step(const double t, const double dt, const RHSFunctionType&
     rhs_func(t + dt / 2, y2_, dydt2_);
 
     // Stage 3
-    const so3_vec theta3 = dt * (dydt2_.v / 2 + dt * (dydt1_.v).cross(dydt2_.v) / 8);
+    const so3_vec theta3 = dt * (dydt2_.v / 2 + dt * ad(dydt1_.v, dydt2_.v) / 8);
     y3_.R = y.R * exp(theta3);
     y3_.v = y.v + dt / 2 * dydt2_.vdot;
     rhs_func(t + dt / 2, y3_, dydt3_);
@@ -55,7 +55,7 @@ void StepperLieRK4::step(const double t, const double dt, const RHSFunctionType&
     // Update state
     const so3_vec theta_end =
         dt / 6 *
-        (dydt1_.v + 2 * dydt2_.v + 2 * dydt3_.v + dydt4_.v + dt * (dydt1_.v).cross(dydt4_.v) / 2);
+        (dydt1_.v + 2 * dydt2_.v + 2 * dydt3_.v + dydt4_.v + dt * ad(dydt1_.v, dydt4_.v) / 2);
     y.R *= exp(theta_end);
     y.v += dt / 6 * (dydt1_.vdot + 2 * dydt2_.vdot + 2 * dydt3_.vdot + dydt4_.vdot);
 }
@@ -83,4 +83,27 @@ void StepperLieRK2CF::step(const double t, const double dt, const RHSFunctionTyp
     const so3_vec theta_end = dt / 2 * (dydt2_.v + dydt3_.v);
     y.R *= exp(theta_end);
     y.v += dt / 2 * (dydt2_.vdot + dydt3_.vdot);
+}
+
+void StepperLieRK3CF::step(const double t, const double dt, const RHSFunctionType& rhs_func,
+                           State& y) {
+    // Stage 1. Compute dy/dt into dydt_
+    rhs_func(t, y, dydt1_);
+
+    // Stage 2
+    const so3_vec theta2 = dt / 3. * dydt1_.v;
+    y2_.R = y.R * exp(theta2);
+    y2_.v = y.v + dt / 3. * dydt1_.vdot;
+    rhs_func(t + dt / 3., y2_, dydt2_);
+
+    // Stage 3
+    const so3_vec theta3 = 2. * dt / 3. * dydt2_.v;
+    y3_.R = y.R * exp(theta3);
+    y3_.v = y.v + 2. * dt / 3. * dydt2_.vdot;
+    rhs_func(t + 2. * dt / 3., y3_, dydt3_);
+
+    // Update state
+    const so3_vec theta_end = dt * (-1. / 12. * dydt1_.v + 3. / 4. * dydt3_.v);
+    y.R = y2_.R * exp(theta_end);
+    y.v = y2_.v + dt * (-1. / 12. * dydt1_.vdot + 3. / 4. * dydt3_.vdot);
 }

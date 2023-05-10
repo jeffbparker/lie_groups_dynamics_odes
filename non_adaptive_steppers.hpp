@@ -73,3 +73,20 @@ class StepperLieRK2CF {
     StateDot dydt2_;
     StateDot dydt3_;
 };
+
+// 2nd-order Lie-RK3CF (Commutator free), part of 3-2 adaptive method
+class StepperLieRK3CF {
+ public:
+    StepperLieRK3CF() = default;
+
+    void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
+
+ private:
+    // intermediate-stage states and derivative storage
+    State y2_;
+    State y3_;
+
+    StateDot dydt1_;
+    StateDot dydt2_;
+    StateDot dydt3_;
+};

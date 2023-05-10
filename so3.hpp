@@ -42,9 +42,8 @@ using so3_vec = Eigen::Vector3d;
 // exp: so(3) -> SO(3)
 SO3 exp(const so3_vec& x);
 
-// NOT IMPLEMENTED YET
-// // adjoint representation.  ad(x, y) = [x, y] = xy - yx
-// so3_vec ad(const so3_vec& x, const so3_vec& y);
+// adjoint representation.  ad(x, y) = [x, y] = xy - yx
+so3_vec ad(const so3_vec& x, const so3_vec& y) { return x.cross(y); };
 
 // // inverse of dexp.
 // so3_vec dexpinv(const so3_vec& x, const so3_vec& y);
