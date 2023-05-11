@@ -67,15 +67,41 @@ double frobenius_error(const Eigen::Matrix3d& R1, const Eigen::Matrix3d& R2) {
 
 }  // namespace
 
+class LieGroupIntegratorTest : public ::testing::Test {
+ protected:
+    static void SetUpTestSuite() {
+        const State y_initial{initial_condition()};
+        const HeavyTop heavy_top{create_heavy_top()};
+
+        // ACTION
+        constexpr double t_start = 0;
+        constexpr double t_end = 0.4;  // 0.4
+
+        // compute reference value with small dt.
+        const double dt_ref = 6e-6;
+        DriverConstantTimestep<StepperLieRK4> driver{y_initial, t_start, t_end, dt_ref, heavy_top};
+        const State y_final_ref = driver.integrate();
+        R_ref_ = y_final_ref.R.matrix();
+        v_ref_ = y_final_ref.v.matrix();
+    }
+
+    // Reference values, computed with high precision once to be used for all tests.
+    static Eigen::Matrix3d R_ref_;
+    static Eigen::Vector3d v_ref_;
+};
+
+// Initialize the shared resource variables
+Eigen::Matrix3d LieGroupIntegratorTest::R_ref_ = Eigen::Matrix3d::Identity();
+Eigen::Vector3d LieGroupIntegratorTest::v_ref_ = Eigen::Vector3d::Zero();
+
 // Using the Heavy Top as a testbed, test the numerical properties of the Lie group integrators.
 // The expected solution has been pre-computed separately with standard RK4 at high precision (small
 // timestep).
 
-TEST(LieGroupIntegratorTest, LieEulerErrorScalingWithDt) {
+TEST_F(LieGroupIntegratorTest, LieEulerErrorScalingWithDt) {
     // SETUP
     const State y_initial{initial_condition()};
     const HeavyTop heavy_top{create_heavy_top()};
-    const double R22_expected = 0.948719679138258;
 
     // ACTION
     constexpr double t_start = 0;
@@ -88,8 +114,8 @@ TEST(LieGroupIntegratorTest, LieEulerErrorScalingWithDt) {
     for (double dt : dt_vec) {
         DriverConstantTimestep<StepperLieEuler> driver{y_initial, t_start, t_end, dt, heavy_top};
         const State y_final = driver.integrate();
-        const double R22 = y_final.R.matrix()(2, 2);
-        const double error = std::abs((R22 - R22_expected) / R22_expected);
+        const Eigen::Matrix3d& R_final = y_final.R.matrix();
+        const double error = frobenius_error(R_final, R_ref_);
         error_vec.push_back(error);
     }
 
@@ -102,11 +128,10 @@ TEST(LieGroupIntegratorTest, LieEulerErrorScalingWithDt) {
     EXPECT_NEAR(error_order, EXPECTED_ERROR_ORDER, TOL);
 }
 
-TEST(LieGroupIntegratorTest, LieRK2ErrorScalingWithDt) {
+TEST_F(LieGroupIntegratorTest, LieRK2ErrorScalingWithDt) {
     // SETUP
     const State y_initial{initial_condition()};
     const HeavyTop heavy_top{create_heavy_top()};
-    const double R22_expected = 0.948719679138258;
 
     // ACTION
     constexpr double t_start = 0;
@@ -120,8 +145,8 @@ TEST(LieGroupIntegratorTest, LieRK2ErrorScalingWithDt) {
         DriverConstantTimestep<StepperLieRK2Midpoint> driver{y_initial, t_start, t_end, dt,
                                                              heavy_top};
         const State y_final = driver.integrate();
-        const double R22 = y_final.R.matrix()(2, 2);
-        const double error = std::abs((R22 - R22_expected) / R22_expected);
+        const Eigen::Matrix3d& R_final = y_final.R.matrix();
+        const double error = frobenius_error(R_final, R_ref_);
         error_vec.push_back(error);
     }
 
@@ -130,12 +155,11 @@ TEST(LieGroupIntegratorTest, LieRK2ErrorScalingWithDt) {
     constexpr double TOL = 0.05;
 
     // asymptotically, error should scale as err ~ dt^p, with p=2 for Lie-RK2 Midpoint.
-    // std::cout << "error order = " << error_order << std::endl;
     constexpr int EXPECTED_ERROR_ORDER = 2;
     EXPECT_NEAR(error_order, EXPECTED_ERROR_ORDER, TOL);
 }
 
-TEST(LieGroupIntegratorTest, LieRK4ErrorScalingWithDt) {
+TEST_F(LieGroupIntegratorTest, LieRK4ErrorScalingWithDt) {
     // SETUP
     const State y_initial{initial_condition()};
     const HeavyTop heavy_top{create_heavy_top()};
@@ -143,12 +167,6 @@ TEST(LieGroupIntegratorTest, LieRK4ErrorScalingWithDt) {
     // ACTION
     constexpr double t_start = 0;
     constexpr double t_end = 0.4;  // 0.4
-
-    // compute reference value with small dt.
-    const double dt_ref = 6e-6;
-    DriverConstantTimestep<StepperLieRK4> driver{y_initial, t_start, t_end, dt_ref, heavy_top};
-    const State y_final_ref = driver.integrate();
-    const Eigen::Matrix3d& R_ref = y_final_ref.R.matrix();
 
     // loop over dt
     const std::vector<double> dt_vec{1e-5, 3e-5, 1e-4};
@@ -158,8 +176,7 @@ TEST(LieGroupIntegratorTest, LieRK4ErrorScalingWithDt) {
         DriverConstantTimestep<StepperLieRK4> driver{y_initial, t_start, t_end, dt, heavy_top};
         const State y_final = driver.integrate();
         const Eigen::Matrix3d& R_final = y_final.R.matrix();
-        const double error = frobenius_error(R_final, R_ref);
-
+        const double error = frobenius_error(R_final, R_ref_);
         error_vec.push_back(error);
     }
 
@@ -172,7 +189,7 @@ TEST(LieGroupIntegratorTest, LieRK4ErrorScalingWithDt) {
     EXPECT_NEAR(error_order, EXPECTED_ERROR_ORDER, TOL);
 }
 
-TEST(LieGroupIntegratorTest, LieRK2CFErrorScalingWithDt) {
+TEST_F(LieGroupIntegratorTest, LieRK2CFErrorScalingWithDt) {
     // SETUP
     const State y_initial{initial_condition()};
     const HeavyTop heavy_top{create_heavy_top()};
@@ -180,12 +197,6 @@ TEST(LieGroupIntegratorTest, LieRK2CFErrorScalingWithDt) {
     // ACTION
     constexpr double t_start = 0;
     constexpr double t_end = 0.4;  // 0.4
-
-    // compute reference value with small dt.
-    const double dt_ref = 1e-5;
-    DriverConstantTimestep<StepperLieRK4> driver{y_initial, t_start, t_end, dt_ref, heavy_top};
-    const State y_final_ref = driver.integrate();
-    const Eigen::Matrix3d& R_ref = y_final_ref.R.matrix();
 
     // loop over dt
     const std::vector<double> dt_vec{1e-5, 1e-4, 1e-3};
@@ -195,7 +206,7 @@ TEST(LieGroupIntegratorTest, LieRK2CFErrorScalingWithDt) {
         DriverConstantTimestep<StepperLieRK2CF> driver{y_initial, t_start, t_end, dt, heavy_top};
         const State y_final = driver.integrate();
         const Eigen::Matrix3d& R_final = y_final.R.matrix();
-        const double error = frobenius_error(R_final, R_ref);
+        const double error = frobenius_error(R_final, R_ref_);
         error_vec.push_back(error);
     }
 
@@ -208,7 +219,7 @@ TEST(LieGroupIntegratorTest, LieRK2CFErrorScalingWithDt) {
     EXPECT_NEAR(error_order, EXPECTED_ERROR_ORDER, TOL);
 }
 
-TEST(LieGroupIntegratorTest, LieRK3CFErrorScalingWithDt) {
+TEST_F(LieGroupIntegratorTest, LieRK3CFErrorScalingWithDt) {
     // SETUP
     const State y_initial{initial_condition()};
     const HeavyTop heavy_top{create_heavy_top()};
@@ -216,12 +227,6 @@ TEST(LieGroupIntegratorTest, LieRK3CFErrorScalingWithDt) {
     // ACTION
     constexpr double t_start = 0;
     constexpr double t_end = 0.4;  // 0.4
-
-    // compute reference value with small dt.
-    const double dt_ref = 1e-5;
-    DriverConstantTimestep<StepperLieRK4> driver{y_initial, t_start, t_end, dt_ref, heavy_top};
-    const State y_final_ref = driver.integrate();
-    const Eigen::Matrix3d& R_ref = y_final_ref.R.matrix();
 
     // loop over dt
     const std::vector<double> dt_vec{1e-5, 3e-5, 1e-4, 3e-4};
@@ -231,7 +236,7 @@ TEST(LieGroupIntegratorTest, LieRK3CFErrorScalingWithDt) {
         DriverConstantTimestep<StepperLieRK3CF> driver{y_initial, t_start, t_end, dt, heavy_top};
         const State y_final = driver.integrate();
         const Eigen::Matrix3d& R_final = y_final.R.matrix();
-        const double error = frobenius_error(R_final, R_ref);
+        const double error = frobenius_error(R_final, R_ref_);
         error_vec.push_back(error);
     }
 
