@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Eigen/Dense"
+#include "adaptive_steppers.hpp"
 #include "drivers.hpp"
 #include "gtest/gtest.h"
 #include "heavy_top.hpp"
@@ -142,8 +143,8 @@ TEST_F(LieGroupIntegratorTest, LieRK2ErrorScalingWithDt) {
     std::vector<double> error_vec;
 
     for (double dt : dt_vec) {
-        DriverConstantTimestep<StepperLieRK2Midpoint> driver{y_initial, t_start, t_end, dt,
-                                                             heavy_top};
+        DriverConstantTimestep<StepperLieRK2Midpoint> driver{
+            y_initial, t_start, t_end, dt, heavy_top};
         const State y_final = driver.integrate();
         const Eigen::Matrix3d& R_final = y_final.R.matrix();
         const double error = frobenius_error(R_final, R_ref_);
@@ -246,5 +247,50 @@ TEST_F(LieGroupIntegratorTest, LieRK3CFErrorScalingWithDt) {
 
     // asymptotically, error should scale as err ~ dt^p, with p=3 for Lie-RK3CF
     constexpr int EXPECTED_ERROR_ORDER = 3;
+    EXPECT_NEAR(error_order, EXPECTED_ERROR_ORDER, TOL);
+}
+
+TEST_F(LieGroupIntegratorTest, LieRK12ErrorScalingWithTol) {
+    // SETUP
+    const State y_initial{initial_condition()};
+    const HeavyTop heavy_top{create_heavy_top()};
+    const double initial_dt = 1e-3;
+    const double min_dt = 0;
+    const double max_dt = 1e2;
+    const double controller_parameter_beta0 = 0;
+
+    // ACTION
+    constexpr double t_start = 0;
+    constexpr double t_end = 0.4;  // 0.4
+
+    // loop over tol
+    const std::vector<double> tol_vec{1e-5, 1e-4, 1e-3};
+    std::vector<double> error_vec;
+
+    for (double tol : tol_vec) {
+        const double atol = tol;
+        const double rtol = tol;
+        DriverAdaptiveTimestep<StepperRK12> driver{y_initial,
+                                                   t_start,
+                                                   t_end,
+                                                   atol,
+                                                   rtol,
+                                                   initial_dt,
+                                                   min_dt,
+                                                   max_dt,
+                                                   controller_parameter_beta0,
+                                                   heavy_top};
+        const State y_final = driver.integrate();
+        const Eigen::Matrix3d& R_final = y_final.R.matrix();
+        const double error = frobenius_error(R_final, R_ref_);
+        error_vec.push_back(error);
+    }
+
+    // VERIFICATION
+    const double error_order = compute_power_exponent(tol_vec, error_vec);
+    constexpr double TOL = 0.1;
+
+    // asymptotically, error should scale as err ~ tol^1
+    constexpr int EXPECTED_ERROR_ORDER = 1;
     EXPECT_NEAR(error_order, EXPECTED_ERROR_ORDER, TOL);
 }
