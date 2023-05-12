@@ -1,5 +1,4 @@
-# lie_groups_dynamics_odes
-Numerical integration of differential equations on Lie groups.
+# Numerical integration of differential equations on Lie groups.
 
 This repo provides code to demonstrate the numerical solution of ordinary differential equations (ODEs) defined on Lie groups.  Specialized Lie group integrators are used which preserve the geometric constraint that the Lie-group degrees of freedom are guaranteed to stay on the Lie group manifold (to within machine precision).
 
