@@ -2,7 +2,6 @@
 
 #include <cmath>
 
-#include "Eigen/Dense"
 #include "aliases.hpp"
 #include "state.hpp"
 

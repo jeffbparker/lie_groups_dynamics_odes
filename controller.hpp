@@ -8,8 +8,8 @@ class TimestepController {
         : alpha_{1. / order - 0.75 * beta0 / order}, beta_{beta0 / order} {}
 
     // Determine whether previous step was successful based on error.  Calculate
-    // next stepsize. If false, modify step_size. If true, modify next_step_size.
-    bool success(double error, double &step_size, double &next_step_size);
+    // next timestep. If false, modify dt. If true, modify next_dt.
+    bool success(double error, double& dt, double& next_dt);
 
  private:
     const double alpha_;

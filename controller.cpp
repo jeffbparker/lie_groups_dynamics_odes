@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-bool TimestepController::success(const double error, double &step_size, double &next_step_size) {
+bool TimestepController::success(const double error, double& dt, double& next_dt) {
     constexpr double SAFETY_FACTOR = 0.9;
 
     // Min and max scale factors by which the step size can change in one step.
@@ -21,9 +21,9 @@ bool TimestepController::success(const double error, double &step_size, double &
 
         // If the prior step attempt was rejected, don't let the step size increase
         if (rejected_prev_step_) {
-            next_step_size = step_size * std::min(scale_factor, 1.0);
+            next_dt = dt * std::min(scale_factor, 1.0);
         } else {
-            next_step_size = step_size * scale_factor;
+            next_dt = dt * scale_factor;
         }
 
         // store the error for the next call
@@ -34,7 +34,7 @@ bool TimestepController::success(const double error, double &step_size, double &
     } else {  // step failed.  Compute the reduced stepsize for next step attempt.
         scale_factor = SAFETY_FACTOR * std::pow(error, -alpha_);
         scale_factor = std::max(scale_factor, MIN_SCALE_FACTOR);
-        step_size *= scale_factor;
+        dt *= scale_factor;
         rejected_prev_step_ = true;
         return false;
     }
