@@ -31,7 +31,12 @@ class DriverAdaptiveTimestep {
           rhs_func_{std::move(rhs_func)},
           stepper_{atol, rtol, controller_parameter_beta0} {}
 
-    // numerically integrate from t_start to t_end
+    ~DriverAdaptiveTimestep() {
+        std::cout << "Num steps accepted: " << num_steps_accepted_
+                  << "   Num steps retried: " << num_steps_retried_ << std::endl;
+    }
+
+    // Numerically integrate from t_start to t_end.
     State integrate() {
         for (int j = 0; j < max_number_of_steps_; ++j) {
             // compute derivative at beginning of step here, in case it needs to be reused.
@@ -103,6 +108,7 @@ class DriverConstantTimestep {
           rhs_func_{std::move(rhs_func)},
           stepper_{} {}
 
+    // Numerically integrate from t_start to t_end.
     State integrate() {
         const double duration = t_end_ - t_start_;
         const int num_steps = static_cast<int>(std::ceil(duration / desired_dt_));

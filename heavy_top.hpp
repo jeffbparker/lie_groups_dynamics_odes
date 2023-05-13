@@ -12,5 +12,9 @@ class HeavyTop {
     double Mgl_;               // mass * gravitational acceleration * length
     Eigen::Vector3d Ib_diag_;  // principal moments of inertia
 
+    // The differential equation for the heavy top system is given by:
+    //
+    // dR/dt  =  R * hat(v)     R in SO(3), v in R^3, hat(v) in so(3).
+    // dv/dt  =  f(R, v)    [this function is computed below in dydt.vdot]
     void operator()(double t, const State& y, StateDot& dydt);
 };

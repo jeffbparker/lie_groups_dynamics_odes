@@ -2,10 +2,6 @@
 
 #include "Eigen/Dense"
 
-// The differential equation for the heavy top system is given by:
-//
-// dR/dt  =  R * hat(v)     R in SO(3), v in R^3, hat(v) in so(3).
-// dv/dt  =  f(R, v)    [this function is computed below in dydt.vdot]
 void HeavyTop::operator()(double, const State& y, StateDot& dydt) {
     using Vec3 = Eigen::Vector3d;
     dydt.v = y.v;

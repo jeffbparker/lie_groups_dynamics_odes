@@ -11,15 +11,16 @@ The Lie Group integrators included in this demonstration are:
 **Non-adaptive, constant-timestep integrators**:
 * Lie-Euler - The Lie group version of explicit Euler
 * Lie-RK2 - The Lie group version of explicit midpoint method, a 2nd-order method
-* Lie-RK4 - A variant of Lie RK4 based on minimizing the number of commutators
+* Lie-RK4 - A variant of Lie-RKMK4 based on reducing the number of commutators
 * Lie-RK2CF - A 2nd-order commutator-free method designed for use in a 2(3) adaptive integrator
 * Lie-RK3CF - A 3rd-order commutator-free method designed for use in a 2(3) adaptive integrator
 
 **Adaptive-timestep integrators**:
 - Lie-RK12 - Adaptive-step method based on the embedded pair of RK2 (midpoint) and explcit Euler
-- (To do) Lie-RK23CF - Adaptive-step method based on an embedded pair of 2nd and 3rd-order steps, which are *commutator free*.
+- Lie-RK23CF - Adaptive-step method based on an embedded pair of 2nd and 3rd-order steps, which are *commutator free*.
 
 
 References
-1. A. Iserles, H. Z. Munthe-Kaas, S. P. Norsett, A. Zanna, Lie-group methods, *Acta Numerica*. (2005)
-2.
+1. A. Iserles, H. Z. Munthe-Kaas, S. P. Norsett, A. Zanna, Lie-group methods, *Acta Numerica* (2005).
+2. E. Celledoni, E. Cokaj, A. Leone, D. Murari, B. Owren, Lie group integrators for mechanical systems, *Intl. J. Comp. Math.* (2021).
+3. W. H. Press, S. A. Teukolsky, W. T. Vetterling, B. P. Flannery, Numerical Recipes: The Art of Scientific Computing, 3rd Ed. (2007).

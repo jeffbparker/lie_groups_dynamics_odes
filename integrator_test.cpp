@@ -1,5 +1,4 @@
 #include <cmath>
-#include <iostream>
 #include <numeric>
 #include <vector>
 
@@ -270,16 +269,16 @@ TEST_F(LieGroupIntegratorTest, LieRK12ErrorScalingWithTol) {
     for (double tol : tol_vec) {
         const double atol = tol;
         const double rtol = tol;
-        DriverAdaptiveTimestep<StepperRK12> driver{y_initial,
-                                                   t_start,
-                                                   t_end,
-                                                   atol,
-                                                   rtol,
-                                                   initial_dt,
-                                                   min_dt,
-                                                   max_dt,
-                                                   controller_parameter_beta0,
-                                                   heavy_top};
+        DriverAdaptiveTimestep<StepperLieRK12> driver{y_initial,
+                                                      t_start,
+                                                      t_end,
+                                                      atol,
+                                                      rtol,
+                                                      initial_dt,
+                                                      min_dt,
+                                                      max_dt,
+                                                      controller_parameter_beta0,
+                                                      heavy_top};
         const State y_final = driver.integrate();
         const Eigen::Matrix3d& R_final = y_final.R.matrix();
         const double error = frobenius_error(R_final, R_ref_);
@@ -289,6 +288,51 @@ TEST_F(LieGroupIntegratorTest, LieRK12ErrorScalingWithTol) {
     // VERIFICATION
     const double error_order = compute_power_exponent(tol_vec, error_vec);
     constexpr double TOL = 0.1;
+
+    // asymptotically, error should scale as err ~ tol^1
+    constexpr int EXPECTED_ERROR_ORDER = 1;
+    EXPECT_NEAR(error_order, EXPECTED_ERROR_ORDER, TOL);
+}
+
+TEST_F(LieGroupIntegratorTest, LieRK23CFErrorScalingWithTol) {
+    // SETUP
+    const State y_initial{initial_condition()};
+    const HeavyTop heavy_top{create_heavy_top()};
+    const double initial_dt = 1e-3;
+    const double min_dt = 0;
+    const double max_dt = 1e2;
+    const double controller_parameter_beta0 = 0;
+
+    // ACTION
+    constexpr double t_start = 0;
+    constexpr double t_end = 0.4;  // 0.4
+
+    // loop over tol
+    const std::vector<double> tol_vec{1e-7, 1e-6, 1e-5, 1e-4};
+    std::vector<double> error_vec;
+
+    for (double tol : tol_vec) {
+        const double atol = tol;
+        const double rtol = tol;
+        DriverAdaptiveTimestep<StepperLieRK23CF> driver{y_initial,
+                                                        t_start,
+                                                        t_end,
+                                                        atol,
+                                                        rtol,
+                                                        initial_dt,
+                                                        min_dt,
+                                                        max_dt,
+                                                        controller_parameter_beta0,
+                                                        heavy_top};
+        const State y_final = driver.integrate();
+        const Eigen::Matrix3d& R_final = y_final.R.matrix();
+        const double error = frobenius_error(R_final, R_ref_);
+        error_vec.push_back(error);
+    }
+
+    // VERIFICATION
+    const double error_order = compute_power_exponent(tol_vec, error_vec);
+    constexpr double TOL = 0.2;
 
     // asymptotically, error should scale as err ~ tol^1
     constexpr int EXPECTED_ERROR_ORDER = 1;
