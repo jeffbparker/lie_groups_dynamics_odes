@@ -47,10 +47,10 @@ class StepperLieRK4 {
     /**
      * @brief Given state y at time t, perform step and update y to time t + dt
      *
-     * @param t - Time at beginning of step
-     * @param dt -timestep
-     * @param rhs_func - Function to compute time derivatives, dy/dt = f(t, y)
-     * @param y - On entry, state at time t.  On exit, state at time t + dt
+     * @param[in] t - Time at beginning of step
+     * @param[in] dt -timestep
+     * @param[in] rhs_func - Function to compute time derivatives, dy/dt = f(t, y)
+     * @param[inout] y - On entry, state at time t.  On exit, state at time t + dt
      */
     void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
 
@@ -70,10 +70,10 @@ class StepperLieRK2CF {
     /**
      * @brief Given state y at time t, perform step and update y to time t + dt
      *
-     * @param t - Time at beginning of step
-     * @param dt -timestep
-     * @param rhs_func - Function to compute time derivatives, dy/dt = f(t, y)
-     * @param y - On entry, state at time t.  On exit, state at time t + dt
+     * @param[in] t - Time at beginning of step
+     * @param[in] dt -timestep
+     * @param[in] rhs_func - Function to compute time derivatives, dy/dt = f(t, y)
+     * @param[inout] y - On entry, state at time t.  On exit, state at time t + dt
      */
     void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
 
@@ -93,10 +93,10 @@ class StepperLieRK3CF {
     /**
      * @brief Given state y at time t, perform step and update y to time t + dt
      *
-     * @param t - Time at beginning of step
-     * @param dt -timestep
-     * @param rhs_func - Function to compute time derivatives, dy/dt = f(t, y)
-     * @param y - On entry, state at time t.  On exit, state at time t + dt
+     * @param[in] t - Time at beginning of step
+     * @param[in] dt -timestep
+     * @param[in] rhs_func - Function to compute time derivatives, dy/dt = f(t, y)
+     * @param[inout] y - On entry, state at time t.  On exit, state at time t + dt
      */
     void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
 
