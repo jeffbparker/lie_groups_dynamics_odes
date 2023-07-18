@@ -18,6 +18,8 @@ class StepperLieEuler {
      */
     void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
 
+    static constexpr int EXPECTED_GLOBAL_ERROR_ORDER = 1;
+
  private:
     StateDot dydt_;  // time derivatives at t
 };
@@ -34,6 +36,8 @@ class StepperLieRK2Midpoint {
      * @param[inout] y - On entry, state at time t.  On exit, state at time t + dt
      */
     void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
+
+    static constexpr int EXPECTED_GLOBAL_ERROR_ORDER = 2;
 
  private:
     State y2_;        // intermediate state at t + dt/2
@@ -53,6 +57,8 @@ class StepperLieRK4 {
      * @param[inout] y - On entry, state at time t.  On exit, state at time t + dt
      */
     void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
+
+    static constexpr int EXPECTED_GLOBAL_ERROR_ORDER = 4;
 
  private:
     // intermediate-stage states and derivative storage
@@ -77,6 +83,8 @@ class StepperLieRK2CF {
      */
     void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
 
+    static constexpr int EXPECTED_GLOBAL_ERROR_ORDER = 2;
+
  private:
     // intermediate-stage states and derivative storage
     State y2_;
@@ -99,6 +107,8 @@ class StepperLieRK3CF {
      * @param[inout] y - On entry, state at time t.  On exit, state at time t + dt
      */
     void step(double t, double dt, const RHSFunctionType& rhs_func, State& y);
+
+    static constexpr int EXPECTED_GLOBAL_ERROR_ORDER = 3;
 
  private:
     // intermediate-stage states and derivative storage
